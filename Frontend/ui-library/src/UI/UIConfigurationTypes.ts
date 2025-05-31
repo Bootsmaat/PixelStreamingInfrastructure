@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-import { FlagsIds, OptionIds } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
+import { FlagsIds, OptionIds } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.6';
 
 export class ExtraFlags {
     static LightMode = 'LightMode' as const;
@@ -33,6 +33,7 @@ export class StatsSections {
     static LatencyStats = 'Latency Stats' as const;
     static LatencyTest = 'Latency Test' as const;
     static DataChannelLatencyTest = 'Data Channel Latency Test' as const;
+    static SessionTest = 'Session Test' as const;
 }
 
 export type StatsSectionsKeys = Exclude<keyof typeof StatsSections, 'prototype'>;

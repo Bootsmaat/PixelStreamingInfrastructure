@@ -9,7 +9,7 @@ import { RemoteOutboundRTPStats, OutboundRTPStats } from './OutBoundRTPStats';
 import { SessionStats } from './SessionStats';
 import { StreamStats } from './StreamStats';
 import { CodecStats } from './CodecStats';
-import { Logger } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
+import { Logger } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.6';
 
 /**
  * The Aggregated Stats that is generated from the RTC Stats Report
@@ -34,7 +34,10 @@ export class AggregatedStats {
     constructor() {
         this.inboundVideoStats = new InboundVideoStats();
         this.inboundAudioStats = new InboundAudioStats();
+        this.candidatePairs = new Array<CandidatePairStats>();
         this.datachannelStats = new DataChannelStats();
+        this.localCandidates = new Array<CandidateStat>();
+        this.remoteCandidates = new Array<CandidateStat>();
         this.outboundVideoStats = new OutboundRTPStats();
         this.outboundAudioStats = new OutboundRTPStats();
         this.remoteOutboundAudioStats = new RemoteOutboundRTPStats();

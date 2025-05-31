@@ -1,13 +1,12 @@
 #!/bin/bash
 
 NODE_VERSION=$(<"${SCRIPT_DIR}/../../../NODE_VERSION")
-NPM="${SCRIPT_DIR}/node/bin/npm"
 
 # Prints the arguments and their descriptions to the console
 function print_usage() {
     echo "
     Script usage:
-        ${0} [--help] [--publicip <IP Address>] [--turn <turn server>] [--stun <stun server>] [server options...]
+        ${0} [--help] [--publicip <IP Address>] [--turn <turn server>] [--stun <stun server>] -- [server options...]
     Where:
         --help              Print this message and stop this script.
         --debug             Run all scripts with --inspect
@@ -35,7 +34,7 @@ function print_usage() {
     if [[ -d "${SCRIPT_DIR}/../../dist/" ]]; then
         pushd "${SCRIPT_DIR}/../.."
         echo "Server options:"
-        "${NPM}" run start -- --help
+        npm run start -- --help
         popd
     fi
     exit 1
@@ -67,49 +66,35 @@ function parse_args() {
         --build-libraries ) BUILD_LIBRARIES=1; shift;;
         --deps ) INSTALL_DEPS=1; shift;;
         --help ) print_usage;;
-        * ) SERVER_ARGS+=" $1"; shift;;
+        -- ) shift; break;;
+        * )
+            echo "Unknown argument: $1"
+            exit 1
+            ;;
         esac
     done
-    if [[ ! -z "${SERVER_ARGS}" ]]; then
-        echo "Parameters being passed to server: ${SERVER_ARGS}"
+    SERVER_ARGS+=$@
+    if [[ ! -z "$@" ]]; then
+        echo "Parameters being passed to server: $@"
     fi
 }
 
 function check_version() { #current_version #min_version
-	#check if same string
-	if [ -z "$2" ] || [ "$1" = "$2" ]; then
+    local current="$1"
+    local minimum="$2"
+
+    # Check if no minimum or both are the same
+	if [ -z "$minimum" ] || [ "$current" = "$minimum" ]; then
 		return 0
 	fi
 
-	local i current minimum
+    local ordered=$(printf "%s\n%s\n" "$minimum" "$current" | sort -V | head -n1)
 
-	IFS="." read -r -a current <<< $1
-	IFS="." read -r -a minimum <<< $2
-
-	# fill empty fields in current with zeros
-	for ((i=${#current[@]}; i<${#minimum[@]}; i++))
-	do
-		current[i]=0
-	done
-
-	for ((i=0; i<${#current[@]}; i++))
-	do
-		if [[ -z ${minimum[i]} ]]; then
-			# fill empty fields in minimum with zeros
-			minimum[i]=0
-    	fi
-
-		if ((10#${current[i]} > 10#${minimum[i]})); then
-			return 1
-	    fi
-
-		if ((10#${current[i]} < 10#${minimum[i]})); then
-			return 2
-    	fi
-	done
-
-	# if got this far string is the same once we added missing 0
-	return 0
+    if [ "$ordered" = "$minimum" ]; then
+        return 1
+    else
+        return 2
+    fi
 }
 
 function check_and_install() { #dep_name #get_version_string #version_min #install_command
@@ -165,15 +150,15 @@ function setup_node() {
 
     popd > /dev/null
 
+    # setup path with our possibly locally installed node
+    PATH="${SCRIPT_DIR}/node/bin:$PATH"
+
     # navigate to project root
     pushd "${SCRIPT_DIR}/../../.." > /dev/null
 
-    node_version=""
-    if [[ -f "${SCRIPT_DIR}/node/bin/node" ]]; then
-        node_version=$("${SCRIPT_DIR}/node/bin/node" --version)
-    fi
+    local node_version=$("node" --version)
 
-    node_url=""
+    local node_url=""
     if [ "$(uname)" == "Darwin" ]; then
         arch=$(uname -m)
         if [[ $arch == x86_64* ]]; then
@@ -187,16 +172,21 @@ function setup_node() {
     else
         node_url="https://nodejs.org/dist/$NODE_VERSION/node-$NODE_VERSION-linux-x64.tar.gz"
     fi
+
     check_and_install "node" "$node_version" "$NODE_VERSION" "curl $node_url --output node.tar.xz
                                                                 && tar -xf node.tar.xz
                                                                 && rm node.tar.xz
                                                                 && mv node-v*-*-* \"${SCRIPT_DIR}/node\""
 
-    if [ $? -eq 1 ] || [ "$INSTALL_DEPS" == "1" ]; then
+    # if node_modules doesnt exist or the package-lock file is newer than node_modules, install deps
+    if [ ! -d node_modules ] || [ ../package-lock.json -nt node_modules ] || [ "$INSTALL_DEPS" == "1" ]; then
         echo "Installing dependencies..."
-        PATH="${SCRIPT_DIR}/node/bin:$PATH"
-        "${NPM}" install
+        npm install
     fi
+
+    # log node version for audits
+    echo "Using node version: $(node --version)"
+    echo "Using NPM version: $(npm --version)"
 
     popd > /dev/null
 }
@@ -207,14 +197,14 @@ function setup_libraries() {
     if [ ! -d "${SCRIPT_DIR}/../../../Common/dist/" ] || [ "$BUILD_LIBRARIES" == "1" ]; then
         pushd "${SCRIPT_DIR}/../../../Common" > /dev/null
         echo "Building common library."
-        "${NPM}" run build:cjs
+        npm run build:cjs
         popd > /dev/null
     fi
 
     if [ ! -d "${SCRIPT_DIR}/../../../Signalling/dist/" ] || [ "$BUILD_LIBRARIES" == "1" ]; then
         pushd "${SCRIPT_DIR}/../../../Signalling" > /dev/null
         echo "Building signalling library."
-        "${NPM}" run build:cjs
+        npm run build:cjs
         popd > /dev/null
     fi
 
@@ -239,14 +229,17 @@ function setup_frontend() {
 	if [ ! -d "${WEBPACK_OUTPUT_PATH}" ] || [ "$BUILD_FRONTEND" == "1" ] ; then
 		echo "Building Typescript Frontend."
 		# Using our bundled NodeJS, build the web frontend files
+        pushd "${SCRIPT_DIR}/../../../Common" > /dev/null
+		npm run build:esm
+		popd > /dev/null
 		pushd "${SCRIPT_DIR}/../../../Frontend/library" > /dev/null
-		"${NPM}" run build:cjs
+		npm run build:esm
 		popd > /dev/null
 		pushd "${SCRIPT_DIR}/../../../Frontend/ui-library" > /dev/null
-		"${NPM}" run build:cjs
+		npm run build:esm
 		popd > /dev/null
 		pushd "${SCRIPT_DIR}/../../../Frontend/implementations/typescript" > /dev/null
-		"${NPM}" run build:dev
+		npm run build:dev
 		popd > /dev/null
 	else
 		echo 'Skipping building Frontend because files already exist. Please run with "--build" to force a rebuild'
@@ -370,19 +363,17 @@ function start_process() {
 
 # Assumes the following are set
 # SCRIPT_DIR = The path to the platform_scripts
-# NPM = The npm command path
 function build_wilbur() {
     if [ ! -d "${SCRIPT_DIR}/../../dist" ] || [ "$BUILD_WILBUR" == "1" ] ; then
         pushd "${SCRIPT_DIR}/../.." > /dev/null
         echo Building wilbur
-        "${NPM}" run build
+        npm run build
         popd > /dev/null
     fi
 }
 
 # Assumes the following are set
 # SCRIPT_DIR = The path to the platform_scripts
-# NPM = The npm command path
 # SERVER_ARGS The arguments to be passed to the server
 function start_wilbur() {
     pushd "${SCRIPT_DIR}/../../../SignallingWebServer" > /dev/null
@@ -390,7 +381,7 @@ function start_wilbur() {
     echo "Starting wilbur signalling server use ctrl-c to exit"
     echo "----------------------------------"
     
-    start_process "sudo PATH=\"$PATH\" \"$NPM\" start -- ${SERVER_ARGS}"
+    start_process "sudo env \"PATH=$PATH\" npm start -- ${SERVER_ARGS}"
 
     popd > /dev/null
 }

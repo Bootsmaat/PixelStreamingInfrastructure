@@ -13,7 +13,7 @@ import {
     SettingsChangedEvent,
     LatencyInfo,
     ShowOnScreenKeyboardEvent
-} from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
+} from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.6';
 import { OverlayBase } from '../Overlay/BaseOverlay';
 import { ActionOverlay } from '../Overlay/ActionOverlay';
 import { TextOverlay } from '../Overlay/TextOverlay';
@@ -130,7 +130,7 @@ export class Application {
 
         if (isPanelEnabled(options.statsPanelConfig)) {
             // Add stats panel
-            this.statsPanel = new StatsPanel(options.statsPanelConfig);
+            this.statsPanel = new StatsPanel(options.statsPanelConfig, this.stream.config);
             this.uiFeaturesElement.appendChild(this.statsPanel.rootElement);
         }
 

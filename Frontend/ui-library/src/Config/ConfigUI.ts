@@ -21,7 +21,7 @@ import {
     isNumericId,
     isTextId,
     isOptionId
-} from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
+} from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.6';
 import { SettingUIFlag } from './SettingUIFlag';
 import { SettingUINumber } from './SettingUINumber';
 import { SettingUIText } from './SettingUIText';
@@ -141,6 +141,8 @@ export class ConfigUI {
                     psSettingsSection,
                     this.textParametersUi.get(TextParameters.SignallingServerUrl)
                 );
+            if (isSettingEnabled(settingsConfig, Flags.BrowserSendOffer))
+                this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.BrowserSendOffer));
             if (isSettingEnabled(settingsConfig, OptionParameters.StreamerId))
                 this.addSettingOption(
                     psSettingsSection,
