@@ -106,7 +106,7 @@ program
     .option(
         '--http_root <path>',
         'Sets the path for the webserver root.',
-        config_file.http_root || `${path.resolve(__dirname, '..', 'www')}`
+        config_file.http_root || `${path.resolve(__dirname, '..', '../Frontend/implementations/basic-login-roles/dist')}`
     )
     .option(
         '--homepage <filename>',

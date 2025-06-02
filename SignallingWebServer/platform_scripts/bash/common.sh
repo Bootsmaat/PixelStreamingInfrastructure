@@ -225,7 +225,7 @@ function setup_frontend() {
 	set -e
 
     if [[ -z "$FRONTEND_DIR" ]]; then
-        FRONTEND_DIR="${SCRIPT_DIR}/../../www"
+        FRONTEND_DIR="${SCRIPT_DIR}/../../../Frontend/implementations/basic-login-roles/dist"
     fi
 
     # tell webpack where to output the built frontend
@@ -237,7 +237,7 @@ function setup_frontend() {
 	# If player.html doesn't exist, or --build passed as arg, rebuild the frontend
     echo Testing ${WEBPACK_OUTPUT_PATH}
 	if [ ! -d "${WEBPACK_OUTPUT_PATH}" ] || [ "$BUILD_FRONTEND" == "1" ] ; then
-		echo "Building Typescript Frontend."
+		echo "Building basic-login-roles Frontend."
 		# Using our bundled NodeJS, build the web frontend files
 		pushd "${SCRIPT_DIR}/../../../Frontend/library" > /dev/null
 		"${NPM}" run build:cjs
@@ -245,7 +245,7 @@ function setup_frontend() {
 		pushd "${SCRIPT_DIR}/../../../Frontend/ui-library" > /dev/null
 		"${NPM}" run build:cjs
 		popd > /dev/null
-		pushd "${SCRIPT_DIR}/../../../Frontend/implementations/typescript" > /dev/null
+		pushd "${SCRIPT_DIR}/../../../Frontend/implementations/basic-login-roles" > /dev/null
 		"${NPM}" run build:dev
 		popd > /dev/null
 	else
