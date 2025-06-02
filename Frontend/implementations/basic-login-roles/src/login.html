@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelStreaming Service - Login</title>
+    <link rel="stylesheet" href="./login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+</head>
+<body style="background: #111; min-height: 100vh; font-family: 'Montserrat', sans-serif; margin: 0; display: flex; align-items: center; justify-content: center;">
+    <div class="login-container">
+        <img src="./images/logo.png" alt="Logo" class="login-box-logo" />
+        <div class="login-title">PixelStreaming Service</div>
+        <h2>Login</h2>
+        <div id="error-message" class="error-message" style="display:none;"></div>
+        <form id="login-form">
+            <div class="form-group">
+                <label>Username or Email:</label>
+                <input type="text" id="username" required />
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" required />
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <!-- Script tag will be injected by HtmlWebpackPlugin -->
+</body>
+</html> 
