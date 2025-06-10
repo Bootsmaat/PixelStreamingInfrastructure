@@ -8,7 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.hostname === "localhost" && window.location.port === "3000") {
         apiBaseUrl = "https://localhost:3000";
     } else {
-        apiBaseUrl = window.location.origin;
+        // Insert '-admin' before the first dot in the hostname
+        const hostParts = window.location.hostname.split(".");
+        hostParts[0] = hostParts[0] + "-admin";
+        const adminHost = hostParts.join(".");
+        apiBaseUrl = `https://${adminHost}:4433`;
     }
 
     form.addEventListener('submit', async (e) => {
