@@ -4,13 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password') as HTMLInputElement;
     const errorMessage = document.getElementById('error-message') as HTMLDivElement;
 
+    let apiBaseUrl: string;
+    if (window.location.hostname === "localhost" && window.location.port === "3000") {
+        apiBaseUrl = "https://localhost:3000";
+    } else {
+        apiBaseUrl = window.location.origin;
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
 
         try {
-            const response = await fetch('https://localhost:3000/api/login', {
+            const response = await fetch(`${apiBaseUrl}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
