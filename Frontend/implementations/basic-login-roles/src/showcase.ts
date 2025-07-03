@@ -2,6 +2,9 @@
 
 import { Config, PixelStreaming } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
 import { Application, PixelStreamingApplicationStyle } from '@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.5';
+import { Logger, LogLevel } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
+Logger.InitLogging(LogLevel.Info, true);
+
 export const PixelStreamingApplicationStyles = new PixelStreamingApplicationStyle();
 PixelStreamingApplicationStyles.applyStyleSheet();
 
@@ -29,6 +32,8 @@ class Showcase {
 	private _pixelStreaming : PixelStreaming;
 	private _infoElem : HTMLElement;
 	private _exampleSettingsElem : HTMLElement;
+
+	cmdResult: boolean;
 
 	constructor (pixelStreaming : PixelStreaming) {
 		this._pixelStreaming = pixelStreaming;
@@ -74,15 +79,18 @@ class Showcase {
 	}
 
 	private _onCharacterClicked(characterName : string) {
-		this._pixelStreaming.emitUIInteraction({ Character: characterName });
+		this.cmdResult = this._pixelStreaming.emitUIInteraction({ Character: characterName });
+		Logger.Warning(`Character selection "${characterName}" was ${this.cmdResult ? 'successful' : 'failed'}`);
 	}
 
 	private _onSkinClicked(skinIndex : number) {
-		this._pixelStreaming.emitUIInteraction({ Skin: skinIndex });
+		this.cmdResult = this._pixelStreaming.emitUIInteraction({ Skin: skinIndex });
+		Logger.Warning(`Skin selection "${skinIndex}" was ${this.cmdResult ? 'successful' : 'failed'}`);
 	}
 
 	private _onResClicked(width : number, height : number) {
-		this._pixelStreaming.emitCommand({ Resolution: { Width: width, Height: height } });
+		this.cmdResult = this._pixelStreaming.emitCommand({ Resolution: { Width: width, Height: height } });
+		Logger.Warning(`Resolution selection "${width}" x "${height}" was ${this.cmdResult ? 'successful' : 'failed'}`);
 	}
 
 	private _createGettingStartedExample() {
@@ -130,7 +138,7 @@ class Showcase {
 		const auroraImg = document.createElement("img");
 		auroraImg.classList.add("characterBtn");
 		auroraImg.src = "./images/Aurora.jpg";
-		auroraImg.onclick = () => { this._onCharacterClicked("Aurora"); }
+		auroraImg.onclick = () => { this._onCharacterClicked("0"); }
 		auroraElem.appendChild(auroraImg);
 
 		// Make Crunch character
@@ -139,7 +147,7 @@ class Showcase {
 		const crunchImg = document.createElement("img");
 		crunchImg.classList.add("characterBtn");
 		crunchImg.src = "./images/Crunch.jpg";
-		crunchImg.onclick = () => { this._onCharacterClicked("Crunch"); }
+		crunchImg.onclick = () => { this._onCharacterClicked("1"); }
 		crunchElem.appendChild(crunchImg);
 
 		// Make skin selection title
