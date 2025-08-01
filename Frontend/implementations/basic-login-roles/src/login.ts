@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('error-message') as HTMLDivElement;
 
     let apiBaseUrl: string;
-    if (window.location.hostname === "localhost" && window.location.port === "3000") {
+    //if (window.location.hostname === "localhost" && window.location.port === "3000") {
+    if (window.location.hostname === "localhost") {
         apiBaseUrl = "https://localhost:3000";
     } else {
         // Insert '-admin' before the first dot in the hostname
